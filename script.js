@@ -1,6 +1,22 @@
 const STORAGE_KEY = "cajitas_grupos_personalizados_v2";
 
-// Selectores de interfaz
+// --- GESTIÓN DE TEMAS ---
+const currentTheme = localStorage.getItem("theme") || "dark";
+document.documentElement.setAttribute("data-theme", currentTheme);
+
+const themeBtn = document.createElement("button");
+themeBtn.className = "theme-btn";
+document.body.appendChild(themeBtn);
+
+themeBtn.onclick = () => {
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    const newTheme = isDark ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    showToast(newTheme === "dark" ? "Modo Oscuro" : "Modo Claro");
+};
+
+// --- SELECTORES DE INTERFAZ ---
 const newGroupName = document.getElementById("newGroupName");
 const createGroupBtn = document.getElementById("createGroupBtn");
 const input = document.getElementById("input");
@@ -118,13 +134,10 @@ function clearAll() {
     if (confirm("¿BORRAR TODO PERMANENTEMENTE?")) { state.groups = []; save(); }
 }
 
-// Implementación de reordenamiento nativo
 function initDragAndDrop(el) {
     el.addEventListener('dragstart', () => el.classList.add('dragging'));
-
     el.addEventListener('dragend', () => {
         el.classList.remove('dragging');
-        // Sincronizar estado con el nuevo orden del DOM
         const newOrder = [];
         groupsEl.querySelectorAll('.group').forEach(groupEl => {
             const groupData = state.groups.find(g => g.id === groupEl.dataset.id);
@@ -134,12 +147,10 @@ function initDragAndDrop(el) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         refreshSelect();
     });
-
     el.addEventListener('dragover', (e) => {
         e.preventDefault();
         const dragging = document.querySelector('.dragging');
         if (!dragging || dragging === el) return;
-        
         const rect = el.getBoundingClientRect();
         const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
         groupsEl.insertBefore(dragging, next ? el.nextSibling : el);
@@ -153,14 +164,12 @@ function render() {
         groupsEl.innerHTML = "<div class='empty'>No hay grupos creados.</div>";
         return;
     }
-
     state.groups.forEach(g => {
         const sec = document.createElement("section");
         sec.className = "group";
         sec.draggable = true;
         sec.dataset.id = g.id;
         initDragAndDrop(sec);
-
         sec.innerHTML = `
             <div class="ghead">
                 <div style="display:flex;align-items:center;gap:8px">
@@ -170,12 +179,11 @@ function render() {
                 <div class="gtools">
                     <button class="mini btn-rename" onclick="renameGroup('${g.id}')">Renombrar</button>
                     <button class="mini btn-clear" onclick="clearGroup('${g.id}')">Limpiar</button>
-                    <button class="mini btn-delete" onclick="deleteGroup('${g.id}')">Borrar grupo</button>
+                    <button class="mini btn-delete" onclick="deleteGroup('${g.id}')">Borrar</button>
                 </div>
             </div>
             <div class="grid"></div>
         `;
-        
         const grid = sec.querySelector(".grid");
         if (g.items.length === 0) {
             grid.innerHTML = "<div class='empty'>Sin cajitas</div>";
@@ -198,25 +206,12 @@ function render() {
     });
 }
 
-// Global scope para handlers inline
 window.renameGroup = renameGroup; window.deleteGroup = deleteGroup;
 window.editItem = editItem; window.deleteItem = deleteItem;
 window.clearGroup = clearGroup;
-
 createGroupBtn.onclick = createGroup;
 addBtn.onclick = addItem;
 clearAllBtn.onclick = clearAll;
-
-// Atajos de teclado
 input.onkeydown = (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") addItem(); };
 newGroupName.onkeydown = (e) => { if (e.key === "Enter") createGroup(); };
-
 render();
-
-// Lifecycle de PWA
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .catch(err => console.error('PWA Registration failed:', err));
-    });
-}

@@ -6,6 +6,11 @@
   <title>Cajitas Pro Edition</title>
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
+  <script>
+    // Inline script para evitar flash de blanco/negro antes de cargar script.js
+    const t = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", t);
+  </script>
 </head>
 <body>
   <div class="wrap">
