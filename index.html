@@ -5,32 +5,42 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Cajitas Pro Edition</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
   <script>
-    // Inline script para evitar flash de blanco/negro antes de cargar script.js
     const t = localStorage.getItem("theme") || "dark";
     document.documentElement.setAttribute("data-theme", t);
   </script>
 </head>
 <body>
-  <div class="wrap">
-    <div class="title">Cajitas copiables (Ingeniería de Sistemas)</div>
+  <header class="header-sticky">
+    <div class="wrap">
+      <div class="title">Cajitas copiables (Sistemas)</div>
+      
+      <div class="row">
+        <input id="newGroupName" placeholder="Nuevo grupo..." />
+        <button class="primary" id="createGroupBtn">Crear grupo</button>
+      </div>
 
-    <div class="row">
-      <input id="newGroupName" placeholder="Nombre del nuevo grupo..." />
-      <button class="primary" id="createGroupBtn">Crear grupo</button>
+      <div class="top">
+        <textarea id="input" placeholder="Escribe el texto aquí... (Ctrl+Enter)"></textarea>
+        <select id="groupSelect"></select>
+        <div class="global-actions">
+          <button id="addBtn">Agregar</button>
+          <div class="backup-tools">
+            <button id="exportBtn" title="Exportar JSON">📤</button>
+            <button id="importBtn" title="Importar JSON">📥</button>
+            <button class="danger" id="clearAllBtn" title="Borrar Todo">🗑️</button>
+            <input type="file" id="fileInput" accept=".json" style="display:none" />
+          </div>
+        </div>
+      </div>
+      <div class="muted">Tips: <b>Ctrl + Enter</b> para agregar. Clic en cajita para copiar. Arrastra desde ☰ para ordenar.</div>
     </div>
+  </header>
 
-    <div class="top">
-      <textarea id="input" placeholder="Escribe el texto aquí..."></textarea>
-      <select id="groupSelect"></select>
-      <button id="addBtn">Agregar</button>
-      <button class="danger" id="clearAllBtn">Borrar Todo</button>
-    </div>
+  
 
-    <div class="muted">Tips: <b>Ctrl + Enter</b> para agregar. Clic en cajita para copiar. Arrastra desde ☰ para ordenar.</div>
-    
-    <div class="groups" id="groups" style="margin-top:20px"></div>
+  <div class="wrap">    
+    <div class="groups" id="groups"></div>
   </div>
 
   <div class="toast" id="toast">Copiado ✅</div>

@@ -1,6 +1,6 @@
-const STORAGE_KEY = "cajitas_grupos_personalizados_v2";
+const STORAGE_KEY = "cajitas_grupos_personalizados_v3";
 
-// --- GESTIÓN DE TEMAS ---
+// --- INICIALIZACIÓN DE TEMA ---
 const currentTheme = localStorage.getItem("theme") || "dark";
 document.documentElement.setAttribute("data-theme", currentTheme);
 
@@ -16,7 +16,7 @@ themeBtn.onclick = () => {
     showToast(newTheme === "dark" ? "Modo Oscuro" : "Modo Claro");
 };
 
-// --- SELECTORES DE INTERFAZ ---
+// --- SELECTORES ---
 const newGroupName = document.getElementById("newGroupName");
 const createGroupBtn = document.getElementById("createGroupBtn");
 const input = document.getElementById("input");
@@ -25,31 +25,72 @@ const addBtn = document.getElementById("addBtn");
 const clearAllBtn = document.getElementById("clearAllBtn");
 const groupsEl = document.getElementById("groups");
 const toast = document.getElementById("toast");
+const exportBtn = document.getElementById("exportBtn");
+const importBtn = document.getElementById("importBtn");
+const fileInput = document.getElementById("fileInput");
+
+const generateId = () => crypto?.randomUUID?.() || Math.random().toString(36).substring(2, 15);
 
 let state = load();
 
-// Control de vista compacta
+// --- MODO COMPACTO ---
 const toggleBtn = document.createElement("button");
 toggleBtn.className = "floating-btn";
 document.body.appendChild(toggleBtn);
 toggleBtn.onclick = () => {
-    document.body.classList.toggle("is-compact");
-    const isCompact = document.body.classList.contains("is-compact");
-    toggleBtn.classList.toggle("is-active", isCompact);
-    showToast(isCompact ? "Modo Compacto" : "Modo Edición");
+    const isCompactNow = document.body.classList.toggle("is-compact");
+    toggleBtn.classList.toggle("is-active", isCompactNow);
+    document.querySelectorAll('.group').forEach(g => g.draggable = !isCompactNow);
+    render();
+    showToast(isCompactNow ? "Vista Compacta" : "Vista Edición");
 };
 
 function load() {
     try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw === null) return { groups: [{id:crypto.randomUUID(), name:"Números", items:[]}, {id:crypto.randomUUID(), name:"Letras", items:[]}] };
-        return JSON.parse(raw);
+        return raw ? JSON.parse(raw) : { 
+            groups: [{id: generateId(), name:"Ejemplo Grupo", items:[{id: generateId(), text: "Clic para copiar"}]}] 
+        };
     } catch { return { groups: [] }; }
 }
 
 function save() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     render();
+}
+
+function markError(el) {
+    el.classList.add("error-shake");
+    setTimeout(() => el.classList.remove("error-shake"), 400);
+    el.focus();
+}
+
+// --- BACKUP ---
+function exportData() {
+    const dataStr = JSON.stringify(state, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const link = document.createElement('a');
+    link.setAttribute('href', dataUri);
+    link.setAttribute('download', `cajitas_v3_${new Date().toISOString().slice(0,10)}.json`);
+    link.click();
+}
+
+function importData(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        try {
+            const imported = JSON.parse(event.target.result);
+            if (imported.groups && confirm("¿Sobrescribir datos?")) {
+                state = imported;
+                save();
+                showToast("Importado ✅");
+            }
+        } catch { alert("Error en JSON"); }
+        fileInput.value = "";
+    };
+    reader.readAsText(file);
 }
 
 function showToast(msg) {
@@ -59,15 +100,17 @@ function showToast(msg) {
 }
 
 async function copyText(text) {
-    await navigator.clipboard.writeText(text);
-    showToast("Copiado ✅");
+    try {
+        await navigator.clipboard.writeText(text);
+        showToast("Copiado ✅");
+    } catch { showToast("Error al copiar ❌"); }
 }
 
 function refreshSelect() {
     const prevValue = groupSelect.value;
     groupSelect.innerHTML = "";
     if (state.groups.length === 0) {
-        groupSelect.innerHTML = "<option value=''>Crea un grupo primero...</option>";
+        groupSelect.innerHTML = "<option value=''>Crea un grupo...</option>";
         groupSelect.disabled = true;
     } else {
         groupSelect.disabled = false;
@@ -80,10 +123,11 @@ function refreshSelect() {
     }
 }
 
+// --- CRUD ---
 function createGroup() {
     const name = newGroupName.value.trim();
-    if (!name) return;
-    state.groups.unshift({ id: crypto.randomUUID(), name, items: [] });
+    if (!name) return markError(newGroupName);
+    state.groups.unshift({ id: generateId(), name, items: [] });
     newGroupName.value = "";
     save();
 }
@@ -91,11 +135,11 @@ function createGroup() {
 function renameGroup(id) {
     const g = state.groups.find(x => x.id === id);
     const n = prompt("Nuevo nombre:", g.name);
-    if (n && n.trim()) { g.name = n.trim(); save(); }
+    if (n?.trim()) { g.name = n.trim(); save(); }
 }
 
 function deleteGroup(id) {
-    if (confirm("¿Borrar grupo y todo su contenido?")) {
+    if (confirm("¿Eliminar grupo?")) {
         state.groups = state.groups.filter(x => x.id !== id);
         save();
     }
@@ -103,20 +147,19 @@ function deleteGroup(id) {
 
 function addItem() {
     const val = input.value.trim();
-    const gid = groupSelect.value;
-    const g = state.groups.find(x => x.id === gid);
-    if (val && g) {
-        g.items.unshift({ id: crypto.randomUUID(), text: val });
-        input.value = "";
-        save();
-    }
+    const g = state.groups.find(x => x.id === groupSelect.value);
+    if (!val) return markError(input);
+    if (!g) return alert("Selecciona un grupo");
+    g.items.unshift({ id: generateId(), text: val });
+    input.value = "";
+    save();
 }
 
 function editItem(gid, iid) {
     const g = state.groups.find(x => x.id === gid);
     const item = g.items.find(x => x.id === iid);
     const n = prompt("Editar:", item.text);
-    if (n !== null && n.trim()) { item.text = n.trim(); save(); }
+    if (n?.trim()) { item.text = n.trim(); save(); }
 }
 
 function deleteItem(gid, iid) {
@@ -127,33 +170,33 @@ function deleteItem(gid, iid) {
 
 function clearGroup(id) {
     const g = state.groups.find(x => x.id === id);
-    if (confirm(`¿Vaciar "${g.name}"?`)) { g.items = []; save(); }
+    if (confirm(`¿Vaciar ${g.name}?`)) { g.items = []; save(); }
 }
 
-function clearAll() {
-    if (confirm("¿BORRAR TODO PERMANENTEMENTE?")) { state.groups = []; save(); }
-}
-
+// --- DRAG & DROP ---
 function initDragAndDrop(el) {
-    el.addEventListener('dragstart', () => el.classList.add('dragging'));
+    el.addEventListener('dragstart', (e) => {
+        if (document.body.classList.contains("is-compact")) return e.preventDefault();
+        el.classList.add('dragging');
+    });
+
     el.addEventListener('dragend', () => {
         el.classList.remove('dragging');
-        const newOrder = [];
-        groupsEl.querySelectorAll('.group').forEach(groupEl => {
-            const groupData = state.groups.find(g => g.id === groupEl.dataset.id);
-            if (groupData) newOrder.push(groupData);
-        });
+        const newOrder = Array.from(groupsEl.querySelectorAll('.group')).map(gEl => 
+            state.groups.find(g => g.id === gEl.dataset.id)
+        );
         state.groups = newOrder;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         refreshSelect();
     });
+
     el.addEventListener('dragover', (e) => {
         e.preventDefault();
         const dragging = document.querySelector('.dragging');
         if (!dragging || dragging === el) return;
         const rect = el.getBoundingClientRect();
-        const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
-        groupsEl.insertBefore(dragging, next ? el.nextSibling : el);
+        const next = (e.clientY > rect.top + rect.height / 2) ? el.nextSibling : el;
+        groupsEl.insertBefore(dragging, next);
     });
 }
 
@@ -164,26 +207,33 @@ function render() {
         groupsEl.innerHTML = "<div class='empty'>No hay grupos creados.</div>";
         return;
     }
+
+    const isCompact = document.body.classList.contains("is-compact");
+
     state.groups.forEach(g => {
+        if (isCompact && g.items.length === 0) return;
+
         const sec = document.createElement("section");
         sec.className = "group";
-        sec.draggable = true;
+        sec.draggable = !isCompact;
         sec.dataset.id = g.id;
         initDragAndDrop(sec);
+
         sec.innerHTML = `
             <div class="ghead">
-                <div style="display:flex;align-items:center;gap:8px">
+                <div>
                     <span class="drag-handle">☰</span>
                     <p class="gname">${g.name} — ${g.items.length}</p>
                 </div>
                 <div class="gtools">
                     <button class="mini btn-rename" onclick="renameGroup('${g.id}')">Renombrar</button>
-                    <button class="mini btn-clear" onclick="clearGroup('${g.id}')">Limpiar</button>
+                    <button class="mini btn-clear" onclick="clearGroup('${g.id}')">Vaciar</button>
                     <button class="mini btn-delete" onclick="deleteGroup('${g.id}')">Borrar</button>
                 </div>
             </div>
             <div class="grid"></div>
         `;
+
         const grid = sec.querySelector(".grid");
         if (g.items.length === 0) {
             grid.innerHTML = "<div class='empty'>Sin cajitas</div>";
@@ -194,10 +244,12 @@ function render() {
                 card.innerHTML = `
                     <div class="text">${item.text}</div>
                     <div class="actions">
-                        <button class="a" onclick="event.stopPropagation(); editItem('${g.id}','${item.id}')">Editar</button>
-                        <button class="a" onclick="event.stopPropagation(); deleteItem('${g.id}','${item.id}')">Borrar</button>
+                        <button class="a btn-edit">Editar</button>
+                        <button class="a btn-del">Borrar</button>
                     </div>
                 `;
+                card.querySelector(".btn-edit").onclick = (e) => { e.stopPropagation(); editItem(g.id, item.id); };
+                card.querySelector(".btn-del").onclick = (e) => { e.stopPropagation(); deleteItem(g.id, item.id); };
                 card.onclick = () => copyText(item.text);
                 grid.appendChild(card);
             });
@@ -206,12 +258,19 @@ function render() {
     });
 }
 
-window.renameGroup = renameGroup; window.deleteGroup = deleteGroup;
-window.editItem = editItem; window.deleteItem = deleteItem;
-window.clearGroup = clearGroup;
+// --- EVENTOS ---
 createGroupBtn.onclick = createGroup;
 addBtn.onclick = addItem;
-clearAllBtn.onclick = clearAll;
+clearAllBtn.onclick = () => confirm("¿BORRAR TODO?") && (state.groups = [], save());
+exportBtn.onclick = exportData;
+importBtn.onclick = () => fileInput.click();
+fileInput.onchange = importData;
 input.onkeydown = (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") addItem(); };
 newGroupName.onkeydown = (e) => { if (e.key === "Enter") createGroup(); };
+
+// Registro del Service Worker para PWA
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(console.error);
+}
+
 render();
