@@ -99,11 +99,19 @@ function showToast(msg) {
     setTimeout(() => toast.classList.remove("show"), 1000);
 }
 
-async function copyText(text) {
+async function copyText(text, element) {
     try {
         await navigator.clipboard.writeText(text);
-        showToast("Copiado ✅");
-    } catch { showToast("Error al copiar ❌"); }
+        
+        if (element) {
+            element.classList.add("copy-success");
+            setTimeout(() => {
+                element.classList.remove("copy-success");
+            }, 500);
+        }
+    } catch { 
+        showToast("Error al copiar ❌"); 
+    }
 }
 
 function refreshSelect() {
@@ -250,7 +258,7 @@ function render() {
                 `;
                 card.querySelector(".btn-edit").onclick = (e) => { e.stopPropagation(); editItem(g.id, item.id); };
                 card.querySelector(".btn-del").onclick = (e) => { e.stopPropagation(); deleteItem(g.id, item.id); };
-                card.onclick = () => copyText(item.text);
+                card.onclick = () => copyText(item.text, card);
                 grid.appendChild(card);
             });
         }

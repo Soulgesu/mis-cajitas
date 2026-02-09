@@ -227,3 +227,9 @@ button.primary { background:rgba(34,197,94,.18); border-color:rgba(34,197,94,.35
   box-shadow: 0 0 8px rgba(248, 113, 113, 0.2);
 }
 
+.copy-success { 
+  border-color: #22c55e !important; 
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.05);
+  transition: all 0.2s ease;
+}
