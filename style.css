@@ -430,6 +430,7 @@ button.primary {
   gap: 8px;
   align-items: flex-start;
   align-content: flex-start;
+  min-height: auto !important;
 }
 
 .is-compact .card {
