@@ -224,6 +224,8 @@ button.primary {
   gap: 10px;
   margin-bottom: 10px;
   min-width: 0;
+  flex-wrap: wrap;
+  /* Permitir que los botones bajen si es necesario */
 }
 
 .ghead>div:first-child {
@@ -246,10 +248,20 @@ button.primary {
 
 .gtools {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   align-items: center;
   flex-shrink: 0;
+  margin-left: auto;
+  /* Empujar a la derecha al envolver */
 }
+
+/* Responsividad para cabeceras en pantallas pequeñas */
+@media (max-width: 500px) {
+  .ghead .btn-text {
+    display: none !important;
+  }
+}
+
 
 .drag-handle {
   cursor: grab;

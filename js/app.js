@@ -392,9 +392,9 @@ function render() {
                     <p class="gname">${g.name} — ${g.items.length}</p>
                 </div>
                 <div class="gtools">
-                    <button class="mini btn-rename"><span class="material-symbols-outlined">edit</span> Renombrar</button>
-                    <button class="mini btn-clear"><span class="material-symbols-outlined">mop</span> Vaciar</button>
-                    <button class="mini btn-delete"><span class="material-symbols-outlined">delete</span> Borrar</button>
+                    <button class="mini btn-rename"><span class="material-symbols-outlined">edit</span> <span class="btn-text">Renombrar</span></button>
+                    <button class="mini btn-clear"><span class="material-symbols-outlined">mop</span> <span class="btn-text">Vaciar</span></button>
+                    <button class="mini btn-delete"><span class="material-symbols-outlined">delete</span> <span class="btn-text">Borrar</span></button>
                 </div>
             </div>
             <div class="grid"></div>
