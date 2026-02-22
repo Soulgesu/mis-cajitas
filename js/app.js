@@ -231,30 +231,68 @@ function deleteItem(gid, iid) {
 // ==========================================
 // 5. DRAG AND DROP
 // ==========================================
+const syncStateFromDom = () => {
+    const newGroups = Array.from(document.querySelectorAll('.group')).map(gEl => {
+        const gid = gEl.dataset.id;
+        const originalGroup = state.groups.find(g => g.id === gid);
+        const items = Array.from(gEl.querySelectorAll('.card')).map(cEl => {
+            const iid = cEl.dataset.id;
+            return state.groups.flatMap(g => g.items).find(it => it.id === iid);
+        }).filter(Boolean);
+        return { ...originalGroup, items };
+    });
+    state.groups = newGroups;
+    save();
+};
+
 function initDragAndDrop(el) {
     const groupsEl = document.getElementById("groups");
 
     el.addEventListener('dragstart', (e) => {
         if (document.body.classList.contains("is-compact")) return e.preventDefault();
+        if (e.target.classList.contains('card')) return; // No arrastrar grupo si es card
         el.classList.add('dragging');
     });
 
     el.addEventListener('dragend', () => {
         el.classList.remove('dragging');
-        const newOrder = Array.from(groupsEl.querySelectorAll('.group')).map(gEl =>
-            state.groups.find(g => g.id === gEl.dataset.id)
-        );
-        state.groups = newOrder;
-        save(); // Se eliminó el setItem manual para reusar la función save() pura
+        syncStateFromDom();
     });
 
     el.addEventListener('dragover', (e) => {
         e.preventDefault();
-        const dragging = document.querySelector('.dragging');
+        const dragging = document.querySelector('.group.dragging');
         if (!dragging || dragging === el) return;
         const rect = el.getBoundingClientRect();
         const next = (e.clientY > rect.top + rect.height / 2) ? el.nextSibling : el;
         groupsEl.insertBefore(dragging, next);
+    });
+}
+
+function initItemDragAndDrop(card, gid, iid) {
+    card.addEventListener('dragstart', (e) => {
+        if (document.body.classList.contains("is-compact")) return e.preventDefault();
+        e.stopPropagation();
+        card.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', iid);
+        e.dataTransfer.effectAllowed = 'move';
+    });
+
+    card.addEventListener('dragend', (e) => {
+        e.stopPropagation();
+        card.classList.remove('dragging');
+        syncStateFromDom();
+    });
+
+    card.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const dragging = document.querySelector('.card.dragging');
+        if (!dragging || dragging === card) return;
+
+        const rect = card.getBoundingClientRect();
+        const isAfter = (e.clientY > rect.top + rect.height / 2) || (e.clientX > rect.left + rect.width / 2);
+        card.parentNode.insertBefore(dragging, isAfter ? card.nextSibling : card);
     });
 }
 
@@ -399,6 +437,10 @@ function render() {
             g.items.forEach(item => {
                 const card = document.createElement("div");
                 card.className = "card";
+                card.draggable = !isCompact;
+                card.dataset.id = item.id;
+                initItemDragAndDrop(card, g.id, item.id);
+
                 card.innerHTML = `
                     <div class="text">${escapeHtml(item.text)}</div>
                     <div class="actions">
@@ -439,6 +481,18 @@ function render() {
                 grid.appendChild(card);
             });
         }
+
+        // Listener para permitir soltar items en el grid vacío
+        grid.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const dragging = document.querySelector('.card.dragging');
+            if (!dragging || grid.contains(dragging)) return;
+
+            const emptyMsg = grid.querySelector('.empty-msg');
+            if (emptyMsg) grid.innerHTML = "";
+            grid.appendChild(dragging);
+        });
+
         groupsEl.appendChild(sec);
     });
 }

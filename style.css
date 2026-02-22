@@ -297,7 +297,35 @@ button.primary {
   display: grid;
   gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  min-height: 100px;
+  /* Espacio mínimo garantizado para centrar y soltar */
+  align-items: center;
 }
+
+.empty-msg {
+  grid-column: 1 / -1;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin: 0 !important;
+  padding: 20px 0;
+  pointer-events: none;
+}
+
+.card.dragging {
+  opacity: 0.4;
+  border: 1px dashed #60a5fa !important;
+  transform: scale(0.98);
+  user-select: none;
+}
+
+.card.dragging *,
+.group.dragging * {
+  pointer-events: none;
+}
+
+
 
 .card {
   background: var(--card-bg);
