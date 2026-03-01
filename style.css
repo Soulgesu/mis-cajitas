@@ -488,76 +488,202 @@ button.primary {
 
 /* Removed compact button specific overrides so they look identical to regular cards */
 
-/* Botones Flotantes */
-.floating-btn,
-.theme-btn {
+/* --- FAB Menu Flotante --- */
+.fab-container {
   position: fixed;
+  bottom: 20px;
   right: 20px;
-  width: 64px;
-  height: 36px;
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
   z-index: 1000;
 }
 
-.floating-btn {
-  bottom: 20px;
-  background: #22c55e;
-}
-
-.floating-btn::after {
-  content: '✎';
+.fab-main {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  width: 24px;
-  height: 24px;
-  background: white;
-  border-radius: 50%;
-  transition: all 0.3s;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s;
+  position: relative;
+  z-index: 2;
+  padding: 0;
+}
+
+.fab-main .material-symbols-outlined {
+  font-size: 22px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fab-main:hover {
+  box-shadow: 0 6px 28px rgba(99, 102, 241, 0.55);
+  transform: scale(1.08);
+}
+
+.fab-container.is-open .fab-main {
+  box-shadow: 0 6px 28px rgba(99, 102, 241, 0.55);
+}
+
+.fab-container.is-open .fab-main .material-symbols-outlined {
+  transform: rotate(135deg);
+}
+
+/* Contenedor de acciones */
+.fab-actions {
   position: absolute;
-  left: 4px;
-  color: #333;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  pointer-events: none;
 }
 
-.floating-btn.is-active {
-  background: #ef4444;
+.fab-container.is-open .fab-actions {
+  pointer-events: auto;
 }
 
-.floating-btn.is-active::after {
-  content: '✖';
-  left: 32px;
-}
-
-.theme-btn {
-  bottom: 60px;
-  background: #334155;
-}
-
-.theme-btn::after {
-  content: '🌙';
+/* Botones de acción individuales */
+.fab-action {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  width: 24px;
-  height: 24px;
-  background: white;
-  border-radius: 50%;
-  transition: all 0.3s;
+  opacity: 0;
+  transform: scale(0.3) translateY(20px);
+  transition: opacity 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.2s,
+    box-shadow 0.2s;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  position: relative;
+  padding: 0;
+}
+
+.fab-action .material-symbols-outlined {
+  font-size: 19px;
+}
+
+.fab-container.is-open .fab-action {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.fab-container.is-open .fab-action:nth-child(1) {
+  transition-delay: 0.04s;
+}
+
+.fab-container.is-open .fab-action:nth-child(2) {
+  transition-delay: 0.1s;
+}
+
+.fab-action:not(.is-open):nth-child(1),
+.fab-action:not(.is-open):nth-child(2) {
+  transition-delay: 0s;
+}
+
+.fab-action:hover {
+  transform: scale(1.15) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* Tooltip labels */
+.fab-action::before {
+  content: attr(data-label);
   position: absolute;
-  left: 4px;
+  right: calc(100% + 10px);
+  background: rgba(15, 23, 42, 0.88);
+  color: #f1f5f9;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  backdrop-filter: blur(8px);
+  letter-spacing: 0.02em;
 }
 
-[data-theme='light'] .theme-btn {
-  background: #fbbf24;
+.fab-action:hover::before {
+  opacity: 1;
 }
 
-[data-theme='light'] .theme-btn::after {
-  content: '☀️';
-  left: 32px;
+/* Tema */
+.fab-theme {
+  background: #1e293b;
+  color: #fbbf24;
+}
+
+[data-theme='light'] .fab-theme {
+  background: #fef3c7;
+  color: #b45309;
+  border-color: rgba(180, 83, 9, 0.2);
+}
+
+/* Compacto */
+.fab-compact {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.fab-compact.is-active {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.3);
+}
+
+[data-theme='light'] .fab-compact {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.25);
+}
+
+[data-theme='light'] .fab-compact.is-active {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+[data-theme='light'] .fab-main {
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+}
+
+[data-theme='light'] .fab-action::before {
+  background: rgba(15, 23, 42, 0.92);
+}
+
+/* Responsive FAB */
+@media (max-width: 500px) {
+  .fab-container {
+    bottom: 12px;
+    right: 12px;
+  }
+
+  .fab-main {
+    width: 42px;
+    height: 42px;
+  }
+
+  .fab-action {
+    width: 38px;
+    height: 38px;
+  }
+
+  .fab-action .material-symbols-outlined {
+    font-size: 17px;
+  }
 }
 
 .toast {

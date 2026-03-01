@@ -91,38 +91,90 @@ function showUndoToast(msg, onUndoCallback) {
 }
 
 // ==========================================
-// 3. TEMA Y MODO COMPACTO
+// 3. FAB MENU (TEMA Y MODO COMPACTO)
 // ==========================================
-function initTheme() {
+function initFAB() {
+    // --- Estado inicial ---
     const currentTheme = localStorage.getItem("theme") || "dark";
     document.documentElement.setAttribute("data-theme", currentTheme);
 
-    const themeBtn = document.createElement("button");
-    themeBtn.className = "theme-btn";
-    themeBtn.title = "Cambiar Tema";
-    document.body.appendChild(themeBtn);
+    const isInitiallyCompact = localStorage.getItem("is-compact") === "true";
+    if (isInitiallyCompact) document.body.classList.add("is-compact");
 
-    themeBtn.onclick = () => {
+    // --- Construir DOM del FAB ---
+    const container = document.createElement("div");
+    container.className = "fab-container";
+
+    const actions = document.createElement("div");
+    actions.className = "fab-actions";
+
+    // Botón de Compacto (aparece primero arriba)
+    const compactBtn = document.createElement("button");
+    compactBtn.className = `fab-action fab-compact${isInitiallyCompact ? " is-active" : ""}`;
+    compactBtn.title = "Modo Compacto";
+    compactBtn.setAttribute("data-label", isInitiallyCompact ? "Vista Edición" : "Vista Compacta");
+    const compactIcon = document.createElement("span");
+    compactIcon.className = "material-symbols-outlined";
+    compactIcon.textContent = isInitiallyCompact ? "view_agenda" : "view_compact";
+    compactBtn.appendChild(compactIcon);
+
+    // Botón de Tema (aparece justo encima del FAB principal)
+    const themeBtn = document.createElement("button");
+    themeBtn.className = "fab-action fab-theme";
+    themeBtn.title = "Cambiar Tema";
+    themeBtn.setAttribute("data-label", currentTheme === "dark" ? "Modo Claro" : "Modo Oscuro");
+    const themeIcon = document.createElement("span");
+    themeIcon.className = "material-symbols-outlined";
+    themeIcon.textContent = currentTheme === "dark" ? "dark_mode" : "light_mode";
+    themeBtn.appendChild(themeIcon);
+
+    actions.appendChild(compactBtn);
+    actions.appendChild(themeBtn);
+
+    // Botón principal (gear)
+    const mainBtn = document.createElement("button");
+    mainBtn.className = "fab-main";
+    mainBtn.title = "Opciones";
+    const mainIcon = document.createElement("span");
+    mainIcon.className = "material-symbols-outlined";
+    mainIcon.textContent = "tune";
+    mainBtn.appendChild(mainIcon);
+
+    container.appendChild(actions);
+    container.appendChild(mainBtn);
+    document.body.appendChild(container);
+
+    // --- Abrir / Cerrar FAB ---
+    mainBtn.onclick = (e) => {
+        e.stopPropagation();
+        container.classList.toggle("is-open");
+    };
+
+    document.addEventListener("click", (e) => {
+        if (!container.contains(e.target)) {
+            container.classList.remove("is-open");
+        }
+    });
+
+    // --- Acción: Cambiar Tema ---
+    themeBtn.onclick = (e) => {
+        e.stopPropagation();
         const isDark = document.documentElement.getAttribute("data-theme") === "dark";
         const newTheme = isDark ? "light" : "dark";
         document.documentElement.setAttribute("data-theme", newTheme);
         localStorage.setItem("theme", newTheme);
+        themeIcon.textContent = newTheme === "dark" ? "dark_mode" : "light_mode";
+        themeBtn.setAttribute("data-label", newTheme === "dark" ? "Modo Claro" : "Modo Oscuro");
         showToast(newTheme === "dark" ? "Modo Oscuro" : "Modo Claro");
     };
-}
 
-function initCompactMode() {
-    const isInitiallyCompact = localStorage.getItem("is-compact") === "true";
-    if (isInitiallyCompact) document.body.classList.add("is-compact");
-
-    const toggleBtn = document.createElement("button");
-    toggleBtn.className = `floating-btn ${isInitiallyCompact ? "is-active" : ""}`;
-    toggleBtn.title = "Modo Compacto";
-    document.body.appendChild(toggleBtn);
-
-    toggleBtn.onclick = () => {
+    // --- Acción: Modo Compacto ---
+    compactBtn.onclick = (e) => {
+        e.stopPropagation();
         const isCompactNow = document.body.classList.toggle("is-compact");
-        toggleBtn.classList.toggle("is-active", isCompactNow);
+        compactBtn.classList.toggle("is-active", isCompactNow);
+        compactIcon.textContent = isCompactNow ? "view_agenda" : "view_compact";
+        compactBtn.setAttribute("data-label", isCompactNow ? "Vista Edición" : "Vista Compacta");
         localStorage.setItem("is-compact", isCompactNow);
         document.querySelectorAll('.group').forEach(g => g.draggable = !isCompactNow);
         render();
@@ -506,8 +558,7 @@ function render() {
 // ==========================================
 // 8. INICIALIZACIÓN
 // ==========================================
-initTheme();
-initCompactMode();
+initFAB();
 render();
 
 document.getElementById("createGroupBtn").onclick = createGroup;
