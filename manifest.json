@@ -1,15 +1,21 @@
 {
   "name": "Cajitas Pro Edition",
   "short_name": "Cajitas",
-  "description": "Gestor de textos para Ingeniería de Sistemas",
+  "description": "Gestor de textos copiables para Ingeniería de Sistemas",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#070b14",
-  "theme_color": "#22c55e",
+  "theme_color": "#6366f1",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/5968/5968292.png",
+      "src": "./icons/icon-512.png",
       "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     }

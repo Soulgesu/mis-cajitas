@@ -441,7 +441,7 @@ function render() {
             <div class="ghead">
                 <div>
                     <span class="drag-handle"><span class="material-symbols-outlined">drag_indicator</span></span>
-                    <p class="gname">${g.name} — ${g.items.length}</p>
+                    <p class="gname">${escapeHtml(g.name)} — ${g.items.length}</p>
                 </div>
                 <div class="gtools">
                     <button class="mini btn-rename"><span class="material-symbols-outlined">edit</span> <span class="btn-text">Renombrar</span></button>
