@@ -464,7 +464,13 @@ function render() {
 
                     const saveEdit = () => { editItem(g.id, item.id, textarea.value); render(); };
                     textarea.onblur = saveEdit;
-                    textarea.onkeydown = (ev) => { if (ev.key === "Escape") render(); };
+                    textarea.onkeydown = (ev) => {
+                        if (ev.key === "Enter" && !ev.shiftKey) {
+                            ev.preventDefault();
+                            saveEdit();
+                        }
+                        if (ev.key === "Escape") render();
+                    };
                     textarea.onclick = (ev) => ev.stopPropagation();
                 };
 
