@@ -55,7 +55,7 @@ body {
   margin: 0 0 14px;
 }
 
-/* Panel superior responsivo */
+/* Estilos del panel de arriba */
 .top {
   display: grid;
   gap: 12px;
@@ -64,7 +64,7 @@ body {
   margin-bottom: 14px;
 }
 
-/* Contenedores de acciones globales */
+/* Donde van los botones de exportar y borrar */
 .global-actions {
   display: flex;
   flex-direction: column;
@@ -204,7 +204,7 @@ button.primary {
   transition: transform 0.2s, background 0.2s;
 }
 
-/* Animación de Arrastre */
+/* El efecto cuando estas moviendo un grupo con el ratón */
 .group.dragging {
   opacity: 0.4;
   border: 2px dashed #60a5fa !important;
@@ -216,7 +216,7 @@ button.primary {
   pointer-events: none;
 }
 
-/* Cabecera del Grupo */
+/* La parte de arriba de cada grupo (titulo y botones) */
 .ghead {
   display: flex;
   align-items: center;
@@ -225,7 +225,7 @@ button.primary {
   margin-bottom: 10px;
   min-width: 0;
   flex-wrap: wrap;
-  /* Permitir que los botones bajen si es necesario */
+  /* Para que los botones bajen si no caben en el móvil */
 }
 
 .ghead>div:first-child {
@@ -255,7 +255,7 @@ button.primary {
   /* Empujar a la derecha al envolver */
 }
 
-/* Responsividad para cabeceras en pantallas pequeñas */
+/* Para esconder el texto de los botones en pantallas muy chicas */
 @media (max-width: 500px) {
   .ghead .btn-text {
     display: none !important;
@@ -304,7 +304,7 @@ button.primary {
   background: rgba(248, 113, 113, .05);
 }
 
-/* Grid Interno de Cajitas */
+/* El mosaico donde se ven todas las cajitas juntas */
 .grid {
   display: grid;
   gap: 12px;
@@ -405,7 +405,7 @@ button.primary {
   text-align: center;
 }
 
-/* --- MODO COMPACTO --- */
+/* --- EL MODO COMPACTO --- */
 .is-compact .row,
 .is-compact .top,
 .is-compact .title,
@@ -426,11 +426,10 @@ button.primary {
 }
 
 .is-compact .grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 110px), 1fr));
   gap: 8px;
-  align-items: flex-start;
-  align-content: flex-start;
+  align-items: start;
   min-height: auto !important;
 }
 
@@ -442,11 +441,12 @@ button.primary {
   padding: 4px 8px;
   min-height: auto;
   gap: 8px;
-  flex: 1 1 calc(50% - 8px);
-  min-width: 140px;
-  max-width: 100%;
+  flex: none;
+  width: 100%;
+  max-width: none;
 }
 
+/* El texto de dentro de la cajita compacta */
 .is-compact .text {
   padding-bottom: 0;
   font-size: 12px;
@@ -486,9 +486,7 @@ button.primary {
   margin: 0;
 }
 
-/* Removed compact button specific overrides so they look identical to regular cards */
-
-/* --- FAB Menu Flotante --- */
+/* --- EL MENÚ FLOTANTE (FAB) --- */
 .fab-container {
   position: fixed;
   bottom: 20px;
@@ -533,7 +531,7 @@ button.primary {
   transform: rotate(135deg);
 }
 
-/* Contenedor de acciones */
+/* La cajita donde salen los botones extras al abrir el menú */
 .fab-actions {
   position: absolute;
   bottom: calc(100% + 12px);
@@ -598,7 +596,7 @@ button.primary {
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
 }
 
-/* Tooltip labels */
+/* Los cartelitos que salen al poner el ratón encima de los botones del menú */
 .fab-action::before {
   content: attr(data-label);
   position: absolute;
@@ -664,7 +662,7 @@ button.primary {
   background: rgba(15, 23, 42, 0.92);
 }
 
-/* Responsive FAB */
+/* Ajustes para cuando el menú se ve en pantallas móviles */
 @media (max-width: 500px) {
   .fab-container {
     bottom: 12px;
@@ -739,7 +737,7 @@ button.primary {
   transition: all 0.2s ease;
 }
 
-/* --- ANIMACIONES FLUIDAS --- */
+/* --- EFECTOS Y ANIMACIONES --- */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -773,7 +771,7 @@ button.primary {
   pointer-events: none;
 }
 
-/* Edición in-place Inputs / Textareas */
+/* Cuando cambias el nombre o el texto directamente en la cajita */
 .edit-input {
   width: 100%;
   background: var(--card-hover);
